@@ -65,6 +65,9 @@ gboolean          gst_v4l2_encoder_set_src_fmt (GstV4l2Encoder * self,
                                                 GstVideoInfoDmaDrm * info,
                                                 guint32 pix_fmt);
 
+gboolean          gst_v4l2_encoder_set_crop (GstV4l2Encoder * self,
+                                             const GstVideoInfo * info);
+
 gint              gst_v4l2_encoder_request_buffers (GstV4l2Encoder * self,
                                                     GstPadDirection direction,
                                                     guint num_buffers,

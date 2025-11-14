@@ -599,6 +599,33 @@ gst_v4l2_encoder_set_src_fmt (GstV4l2Encoder * self, GstVideoInfoDmaDrm * info,
   return TRUE;
 }
 
+gboolean
+gst_v4l2_encoder_set_crop (GstV4l2Encoder * self, const GstVideoInfo * info)
+{
+  struct v4l2_selection sel = (struct v4l2_selection) {
+    .type = V4L2_BUF_TYPE_VIDEO_OUTPUT,
+    .target = V4L2_SEL_TGT_CROP,
+  };
+  gint ret;
+
+  if (!(info->width % 16) && !(info->height % 16))
+    return TRUE;
+
+  sel.r.top = 0;
+  sel.r.left = 0;
+  sel.r.width = info->width;
+  sel.r.height = info->height;
+
+  ret = ioctl (self->video_fd, VIDIOC_S_SELECTION, &sel);
+  if (ret < 0) {
+    GST_ERROR_OBJECT (self, "VIDIOC_S_SELECTION failed: %s",
+        g_strerror (errno));
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
 gint
 gst_v4l2_encoder_request_buffers (GstV4l2Encoder * self,
     GstPadDirection direction, guint num_buffers, guint mem_type)
