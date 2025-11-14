@@ -212,6 +212,19 @@ enum v4l2_colorfx {
  */
 #define V4L2_CID_USER_THP7312_BASE		(V4L2_CID_USER_BASE + 0x11c0)
 
+/*
+ * The base for the uvc driver controls.
+ * See linux/uvcvideo.h for the list of controls.
+ * We reserve 64 controls for this driver.
+ */
+#define V4L2_CID_USER_UVC_BASE			(V4L2_CID_USER_BASE + 0x11e0)
+
+/*
+ * The base for Rockchip ISP1 driver controls.
+ * We reserve 16 controls for this driver.
+ */
+#define V4L2_CID_USER_RKISP1_BASE		(V4L2_CID_USER_BASE + 0x1220)
+
 /* MPEG-class control IDs */
 /* The MPEG controls are applicable to all codec controls
  * and the 'MPEG' part of the define is historical */
@@ -1175,7 +1188,7 @@ enum v4l2_flash_strobe_source {
 #define V4L2_CID_JPEG_CLASS_BASE		(V4L2_CTRL_CLASS_JPEG | 0x900)
 #define V4L2_CID_JPEG_CLASS			(V4L2_CTRL_CLASS_JPEG | 1)
 
-#define	V4L2_CID_JPEG_CHROMA_SUBSAMPLING	(V4L2_CID_JPEG_CLASS_BASE + 1)
+#define V4L2_CID_JPEG_CHROMA_SUBSAMPLING	(V4L2_CID_JPEG_CLASS_BASE + 1)
 enum v4l2_jpeg_chroma_subsampling {
 	V4L2_JPEG_CHROMA_SUBSAMPLING_444	= 0,
 	V4L2_JPEG_CHROMA_SUBSAMPLING_422	= 1,
@@ -1184,15 +1197,15 @@ enum v4l2_jpeg_chroma_subsampling {
 	V4L2_JPEG_CHROMA_SUBSAMPLING_410	= 4,
 	V4L2_JPEG_CHROMA_SUBSAMPLING_GRAY	= 5,
 };
-#define	V4L2_CID_JPEG_RESTART_INTERVAL		(V4L2_CID_JPEG_CLASS_BASE + 2)
-#define	V4L2_CID_JPEG_COMPRESSION_QUALITY	(V4L2_CID_JPEG_CLASS_BASE + 3)
+#define V4L2_CID_JPEG_RESTART_INTERVAL		(V4L2_CID_JPEG_CLASS_BASE + 2)
+#define V4L2_CID_JPEG_COMPRESSION_QUALITY	(V4L2_CID_JPEG_CLASS_BASE + 3)
 
-#define	V4L2_CID_JPEG_ACTIVE_MARKER		(V4L2_CID_JPEG_CLASS_BASE + 4)
-#define	V4L2_JPEG_ACTIVE_MARKER_APP0		(1 << 0)
-#define	V4L2_JPEG_ACTIVE_MARKER_APP1		(1 << 1)
-#define	V4L2_JPEG_ACTIVE_MARKER_COM		(1 << 16)
-#define	V4L2_JPEG_ACTIVE_MARKER_DQT		(1 << 17)
-#define	V4L2_JPEG_ACTIVE_MARKER_DHT		(1 << 18)
+#define V4L2_CID_JPEG_ACTIVE_MARKER		(V4L2_CID_JPEG_CLASS_BASE + 4)
+#define V4L2_JPEG_ACTIVE_MARKER_APP0		(1 << 0)
+#define V4L2_JPEG_ACTIVE_MARKER_APP1		(1 << 1)
+#define V4L2_JPEG_ACTIVE_MARKER_COM		(1 << 16)
+#define V4L2_JPEG_ACTIVE_MARKER_DQT		(1 << 17)
+#define V4L2_JPEG_ACTIVE_MARKER_DHT		(1 << 18)
 
 
 /* Image source controls */
@@ -1225,10 +1238,10 @@ enum v4l2_jpeg_chroma_subsampling {
 #define V4L2_CID_DV_CLASS_BASE			(V4L2_CTRL_CLASS_DV | 0x900)
 #define V4L2_CID_DV_CLASS			(V4L2_CTRL_CLASS_DV | 1)
 
-#define	V4L2_CID_DV_TX_HOTPLUG			(V4L2_CID_DV_CLASS_BASE + 1)
-#define	V4L2_CID_DV_TX_RXSENSE			(V4L2_CID_DV_CLASS_BASE + 2)
-#define	V4L2_CID_DV_TX_EDID_PRESENT		(V4L2_CID_DV_CLASS_BASE + 3)
-#define	V4L2_CID_DV_TX_MODE			(V4L2_CID_DV_CLASS_BASE + 4)
+#define V4L2_CID_DV_TX_HOTPLUG			(V4L2_CID_DV_CLASS_BASE + 1)
+#define V4L2_CID_DV_TX_RXSENSE			(V4L2_CID_DV_CLASS_BASE + 2)
+#define V4L2_CID_DV_TX_EDID_PRESENT		(V4L2_CID_DV_CLASS_BASE + 3)
+#define V4L2_CID_DV_TX_MODE			(V4L2_CID_DV_CLASS_BASE + 4)
 enum v4l2_dv_tx_mode {
 	V4L2_DV_TX_MODE_DVI_D	= 0,
 	V4L2_DV_TX_MODE_HDMI	= 1,
@@ -1249,7 +1262,7 @@ enum v4l2_dv_it_content_type {
 	V4L2_DV_IT_CONTENT_TYPE_NO_ITC	  = 4,
 };
 
-#define	V4L2_CID_DV_RX_POWER_PRESENT		(V4L2_CID_DV_CLASS_BASE + 100)
+#define V4L2_CID_DV_RX_POWER_PRESENT		(V4L2_CID_DV_CLASS_BASE + 100)
 #define V4L2_CID_DV_RX_RGB_RANGE		(V4L2_CID_DV_CLASS_BASE + 101)
 #define V4L2_CID_DV_RX_IT_CONTENT_TYPE		(V4L2_CID_DV_CLASS_BASE + 102)
 
@@ -1519,15 +1532,6 @@ struct v4l2_ctrl_h264_pred_weights {
 	struct v4l2_h264_weight_factors weight_factors[2];
 };
 
-#define V4L2_H264_SLICE_TYPE_P				0
-#define V4L2_H264_SLICE_TYPE_B				1
-#define V4L2_H264_SLICE_TYPE_I				2
-#define V4L2_H264_SLICE_TYPE_SP				3
-#define V4L2_H264_SLICE_TYPE_SI				4
-
-#define V4L2_H264_SLICE_FLAG_DIRECT_SPATIAL_MV_PRED	0x01
-#define V4L2_H264_SLICE_FLAG_SP_FOR_SWITCH		0x02
-
 #define V4L2_H264_TOP_FIELD_REF				0x1
 #define V4L2_H264_BOTTOM_FIELD_REF			0x2
 #define V4L2_H264_FRAME_REF				0x3
@@ -1548,8 +1552,18 @@ struct v4l2_h264_reference {
  * Maximum DPB size, as specified by section 'A.3.1 Level limits
  * common to the Baseline, Main, and Extended profiles'.
  */
-#define V4L2_H264_NUM_DPB_ENTRIES 16
-#define V4L2_H264_REF_LIST_LEN (2 * V4L2_H264_NUM_DPB_ENTRIES)
+#define V4L2_H264_NUM_DPB_ENTRIES		16
+#define V4L2_H264_REF_LIST_LEN			(2 * V4L2_H264_NUM_DPB_ENTRIES)
+
+#define V4L2_H264_SLICE_TYPE_P				0
+#define V4L2_H264_SLICE_TYPE_B				1
+#define V4L2_H264_SLICE_TYPE_I				2
+#define V4L2_H264_SLICE_TYPE_SP				3
+#define V4L2_H264_SLICE_TYPE_SI				4
+
+#define V4L2_H264_SLICE_FLAG_DIRECT_SPATIAL_MV_PRED		0x01
+#define V4L2_H264_SLICE_FLAG_SP_FOR_SWITCH			0x02
+#define V4L2_H264_SLICE_FLAG_NUM_REF_IDX_ACTIVE_OVERRIDE	0x04
 
 #define V4L2_CID_STATELESS_H264_SLICE_PARAMS	(V4L2_CID_CODEC_STATELESS_BASE + 6)
 /**
@@ -1689,120 +1703,36 @@ struct v4l2_ctrl_h264_decode_params {
 	__u32 flags;
 };
 
-#define V4L2_H264_NAL_CODED_SLICE_NON_IDR_PIC	1
-#define V4L2_H264_NAL_CODED_SLICE_IDR_PIC	5
+#define V4L2_H264_ENCODE_FLAG_IDR_PIC				0x01
+#define V4L2_H264_ENCODE_FLAG_FIELD_PIC				0x02
+#define V4L2_H264_ENCODE_FLAG_BOTTOM_FIELD			0x04
+#define V4L2_H264_ENCODE_FLAG_DIRECT_SPATIAL_MV_PRED		0x08
+#define V4L2_H264_ENCODE_FLAG_NUM_REF_IDX_ACTIVE_OVERRIDE	0x10
+#define V4L2_H264_ENCODE_FLAG_NO_OUTPUT_OF_PRIOR_PICS		0x20
+#define V4L2_H264_ENCODE_FLAG_LONG_TERM_REFERENCE		0x40
 
 #define V4L2_CID_STATELESS_H264_ENCODE_PARAMS	(V4L2_CID_CODEC_STATELESS_BASE + 8)
-
-/**
- * struct v4l2_ctrl_h264_encode_params - H264 encoding parameters
- *
- * @slice_type: selects slice type. Set to one of V4L2_H264_SLICE_TYPE_{}
- * @pic_parameter_set_id: identifies the picture parameter set that is referred to
- * in the slice header. The value shall be in the range of 0 to 255, inclusive.
- * @frame_num: an identifier for pictures.
- * @idr_pic_id: identifies an IDR picture.
- * @cabac_init_idc: index for determining the initialization table used in the
- * initialization process for context variables. The value of cabac_init_idc
- * shall be in the range of 0 to 2, inclusive.
- * @disable_deblocking_filter_idc: specifies whether the operation of the
- * deblocking filter shall be disabled across some block edges of the slice and
- * specifies for which edges the filtering is disabled.
- * @slice_alpha_c0_offset_div2: offset used in accessing the alpha and tC0
- * deblocking filter tables for filtering operations controlled by the macroblocks
- * within the slice.
- * @slice_beta_offset_div2: offset used in accessing the beta deblocking filter
- * table for filtering operations controlled by the macroblocks within the slice.
- * @slice_size_mb_rows: number of macroblock rows in a slice.
- * @pic_init_qp_minus26: initial value minus 26 of luma qp for each slice.
- * @chroma_qp_index_offset: offset that shall be added to qp luma for addressing the
- * table of qp chroma values for the Cb chroma component.
- * @nal_ref_idc: nal_ref_idc for the header of the generated NAL unit
- * @nal_unit_type: one of the V4L2_H264_NAL_CODED_SLICE_{} values
- * @flags: combination of V4L2_H264_ENCODE_FLAG_{} flags.
- * @reference_ts: timestamp of the V4L2 buffer to use as reference
- */
 struct v4l2_ctrl_h264_encode_params {
-	/* Slice parameters */
-
+	__u8 nal_ref_idc;
 	__u8 slice_type;
 	__u8 pic_parameter_set_id;
+	__u8 colour_plane_id;
 	__u16 frame_num;
 	__u16 idr_pic_id;
+	__u16 pic_order_cnt_lsb;
+	__u8 reserved0[2];
+	__s32 delta_pic_order_cnt_bottom;
+	__s32 delta_pic_order_cnt0;
+	__s32 delta_pic_order_cnt1;
+	__u8 num_ref_idx_l0_active_minus1;
+	__u8 num_ref_idx_l1_active_minus1;
 	__u8 cabac_init_idc;
+	__s8 slice_qp_delta;
 	__u8 disable_deblocking_filter_idc;
 	__s8 slice_alpha_c0_offset_div2;
 	__s8 slice_beta_offset_div2;
-
-	__s32 slice_size_mb_rows;
-
-	/*
-	 * PPS parameters
-	 *
-	 * TODO Duplicating the PPS in the encode_params may not be necessary,
-	 * if the PPS are set via separate control. Otherwise, it may be useful
-	 * to just use struct v4l2_ctrl_h264_pps here.
-	 *
-	 * Needs to be consistent with the values set in the PPS referenced by
-	 * pic_parameter_set_id.
-	 */
-	__s8 pic_init_qp_minus26;
-	__s8 chroma_qp_index_offset;
-
+	__u8 reserved1[6];
 	__u32 flags; /* V4L2_H264_ENCODE_FLAG_ */
-
-	/*
-	 * If nal_ref_idc is 0, the NAL unit won't be used as reference by
-	 * later NAL units. Any other value indicates that the NAL unit may be
-	 * used as reference.
-	 */
-	__u8 nal_ref_idc;
-
-	/* TODO Can we infer the nal_unit_type from the slice_type? */
-	__u8 nal_unit_type;
-
-	/* Reference */
-
-	__u64 reference_ts;
-};
-
-#define V4L2_H264_ENCODE_FLAG_ENTROPY_CODING_MODE	0x01
-#define V4L2_H264_ENCODE_FLAG_TRANSFORM_8X8_MODE	0x02
-#define V4L2_H264_ENCODE_FLAG_CONSTRAINED_INTRA_PRED	0x04
-#define V4L2_H264_ENCODE_FLAG_NUM_REF_IDX_OVERRIDE	0x08
-#define V4L2_H264_ENCODE_FLAG_NO_OUTPUT_OF_PRIOR_PICS	0x10
-#define V4L2_H264_ENCODE_FLAG_LONG_TERM_REFERENCE	0x20
-
-#define V4L2_CID_STATELESS_H264_ENCODE_RC	(V4L2_CID_CODEC_STATELESS_BASE + 9)
-
-/**
- * struct v4l2_ctrl_h264_encode_rc
- *
- * @qp: quantization parameter for the currently encoded slice
- *
- * TODO Setting the QP is enough for implementing const QP, but probably the
- * entire rate control mechanism has to be reworked.
- */
-struct v4l2_ctrl_h264_encode_rc {
-	__u32 qp;
-	__u32 qp_min;
-	__u32 qp_max;
-	__s32 mad_qp_delta;
-	__u32 mad_threshold;
-
-	__u32 cp_distance_mbs;
-	__u32 cp_target[10];
-	__s32 cp_target_error[6];
-	__s32 cp_qp_delta[7];
-};
-
-#define V4L2_CID_STATELESS_H264_ENCODE_FEEDBACK	(V4L2_CID_CODEC_STATELESS_BASE + 10)
-
-struct v4l2_ctrl_h264_encode_feedback {
-	__u32 qp_sum;
-	__u32 cp[10];
-	__u32 mad_count;
-	__u32 rlc_count;
 };
 
 /* Stateless FWHT control, used by the vicodec driver */
@@ -2070,6 +2000,97 @@ struct v4l2_ctrl_vp8_frame {
 
 	__u64 flags;
 };
+
+#define V4L2_CID_STATELESS_VP8_ENCODE_PARAMS	(V4L2_CID_CODEC_STATELESS_BASE + 601)
+
+#define V4L2_VP8_FRAME_FLAG_SHOWFRAME			0x1
+#define V4L2_VP8_FRAME_FLAG_GOLDEN_REFRESH		0x2
+#define V4L2_VP8_FRAME_FLAG_ALTREF_REFRESH		0x4
+#define V4L2_VP8_FRAME_FLAG_SEGMENT_ENABLED		0x8
+#define V4L2_VP8_FRAME_FLAG_LOOP_FILTER_ADJ_ENABLED	0x10
+#define V4L2_VP8_FRAME_FLAG_REFRESH_ENTROPY_PROBS	0x20
+
+#define V4L2_VP8_FRAME_TYPE_KEYFRAME	0
+#define V4L2_VP8_FRAME_TYPE_INTER	1
+
+#define V4L2_VP8_FRAME_COLOR_SPACE_YUV		0
+#define V4L2_VP8_FRAME_COLOR_SPACE_RESERVED	1
+
+#define V4L2_VP8_FRAME_CLAMPING_REQUIRED	0
+#define V4L2_VP8_FRAME_CLAMPING_NO		1
+
+#define V4L2_VP8_FRAME_FILTER_TYPE_NORMAL	0
+#define V4L2_VP8_FRAME_FILTER_TYPE_SIMPLE	1
+
+#define V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_1	0
+#define V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_2	1
+#define V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_4	2
+#define V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_8	3
+
+#define V4L2_VP8_FRAME_GOLDEN_KEEP		0
+#define V4L2_VP8_FRAME_GOLDEN_LASTFRAME		1
+#define V4L2_VP8_FRAME_GOLDEN_ALTREF		2
+
+#define V4L2_VP8_FRAME_ALTREF_KEEP		0
+#define V4L2_VP8_FRAME_ALTREF_LASTFRAME		1
+#define V4L2_VP8_FRAME_ALTREF_GOLDEN		2
+
+#define V4L2_VP8_FRAME_REF_LAST 	0
+#define V4L2_VP8_FRAME_REF_GOLDEN	1
+#define V4L2_VP8_FRAME_REF_ALT		2
+
+/**
+ * struct v4l2_ctrl_vp8_encode_params - VP8 encode parameters
+ * @flags: combination of V4L2_VP8_FRAME_FLAG_{} flags.
+ * @frame_type: specifies the frame type (key or inter).
+ * 		Set to one of V4L2_VP8_FRAME_TYPE_{}.
+ * @color_space: defines the YUV color space of the sequence.
+ * 		 V4L2_VP8_FRAME_TYPE_INTER frames shall set this field to zero.
+ * 		 Set to one of V4L2_VP8_FRAME_COLOR_SPACE_{}.
+ * @clamping_type: defines pixel value clamping type.
+ * 		   V4L2_VP8_FRAME_TYPE_INTER frames shall set this field to zero.
+ * 		   Set to one of V4L2_VP8_FRAME_CLAMPING_{}.
+ * @loop_filter_type: selects the type of loop filter applied.
+ * 		 Set to one of V4L2_VP8_FRAME_FILTER_TYPE_{}.
+ * @loop_filter_level: sets the strength of the applied loop filter.
+ *		       Set to a value from the rage 0..63.
+ * @sharpness_level: sets the sharpness of the applied loop filter.
+ * 		     Set to a value from the range 0..7.
+ * @log2_nbr_of_dct_partitions: determines the number of separate partitions
+ * 				containing the DCT coefficients of macroblocks.
+ * 				Set to one of V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_{}.
+ * @prob_intra: indicates the probability of an intra macroblock.
+ *		Set to a value from the range 0..255.
+ * @prob_last: indicates the probability that the last reference frame is used for inter-prediction.
+ *		Set to a value from the range 0..255.
+ * @prob_gf: indicates the probability that the golden reference frame is used for inter-prediction.
+ *	     Set to a value from the range 0..255.
+ * @copy_buffer_to_golden: specifies the golden frame refresh strategy.
+ * 		    Set to one of V4L2_VP8_FRAME_FLAG_GOLDEN_{}.
+ * @copy_buffer_to_alternate: specifies the atlref frame refresh strategy.
+ * 		    Set to one of V4L2_VP8_FRAME_FLAG_ALTREF_{}.
+ * @reference_type: specifies what kind of reference to use for current inter frame.
+ * 		    V4L2_VP8_FRAME_TYPE_KEYFRAME shall set this field to zero.
+ * 		    Set to one of V4L2_VP8_FRAME_REF_{}.
+ */
+struct v4l2_ctrl_vp8_encode_params {
+	__u32 flags;
+	__u8 frame_type;
+	__u8 color_space;
+	__u8 clamping_type;
+	__u8 loop_filter_type;
+	__u8 loop_filter_level;
+	__u8 sharpness_level;
+	__u8 log2_nbr_of_dct_partitions;
+	__u8 prob_intra;
+	__u8 prob_last;
+	__u8 prob_gf;
+	__u8 copy_buffer_to_golden;
+	__u8 copy_buffer_to_alternate;
+	__u8 reference_type;
+};
+
+#define V4L2_CID_STATELESS_VP8_ENCODE_QP	(V4L2_CID_CODEC_STATELESS_BASE + 602)
 
 /* Stateless MPEG-2 controls */
 
@@ -2646,44 +2667,10 @@ struct v4l2_ctrl_hevc_scaling_matrix {
 	__u8	scaling_list_dc_coef_32x32[2];
 };
 
-#define V4L2_CID_COLORIMETRY_CLASS_BASE	(V4L2_CTRL_CLASS_COLORIMETRY | 0x900)
-#define V4L2_CID_COLORIMETRY_CLASS	(V4L2_CTRL_CLASS_COLORIMETRY | 1)
-
-#define V4L2_CID_COLORIMETRY_HDR10_CLL_INFO	(V4L2_CID_COLORIMETRY_CLASS_BASE + 0)
-
-struct v4l2_ctrl_hdr10_cll_info {
-	__u16 max_content_light_level;
-	__u16 max_pic_average_light_level;
-};
-
-#define V4L2_CID_COLORIMETRY_HDR10_MASTERING_DISPLAY	(V4L2_CID_COLORIMETRY_CLASS_BASE + 1)
-
-#define V4L2_HDR10_MASTERING_PRIMARIES_X_LOW	5
-#define V4L2_HDR10_MASTERING_PRIMARIES_X_HIGH	37000
-#define V4L2_HDR10_MASTERING_PRIMARIES_Y_LOW	5
-#define V4L2_HDR10_MASTERING_PRIMARIES_Y_HIGH	42000
-#define V4L2_HDR10_MASTERING_WHITE_POINT_X_LOW	5
-#define V4L2_HDR10_MASTERING_WHITE_POINT_X_HIGH	37000
-#define V4L2_HDR10_MASTERING_WHITE_POINT_Y_LOW	5
-#define V4L2_HDR10_MASTERING_WHITE_POINT_Y_HIGH	42000
-#define V4L2_HDR10_MASTERING_MAX_LUMA_LOW	50000
-#define V4L2_HDR10_MASTERING_MAX_LUMA_HIGH	100000000
-#define V4L2_HDR10_MASTERING_MIN_LUMA_LOW	1
-#define V4L2_HDR10_MASTERING_MIN_LUMA_HIGH	50000
-
-struct v4l2_ctrl_hdr10_mastering_display {
-	__u16 display_primaries_x[3];
-	__u16 display_primaries_y[3];
-	__u16 white_point_x;
-	__u16 white_point_y;
-	__u32 max_display_mastering_luminance;
-	__u32 min_display_mastering_luminance;
-};
-
 /* Stateless VP9 controls */
 
 #define V4L2_VP9_LOOP_FILTER_FLAG_DELTA_ENABLED	0x1
-#define	V4L2_VP9_LOOP_FILTER_FLAG_DELTA_UPDATE	0x2
+#define V4L2_VP9_LOOP_FILTER_FLAG_DELTA_UPDATE	0x2
 
 /**
  * struct v4l2_vp9_loop_filter - VP9 loop filter parameters
@@ -3602,96 +3589,6 @@ struct v4l2_ctrl_av1_film_grain {
 	__u16 cr_offset;
 	__u8 reserved[4];
 };
-#define V4L2_CID_STATELESS_VP8_ENCODE_PARAMS	(V4L2_CID_CODEC_STATELESS_BASE + 601)
-
-#define V4L2_VP8_FRAME_FLAG_SHOWFRAME			0x1
-#define V4L2_VP8_FRAME_FLAG_GOLDEN_REFRESH		0x2
-#define V4L2_VP8_FRAME_FLAG_ALTREF_REFRESH		0x4
-#define V4L2_VP8_FRAME_FLAG_SEGMENT_ENABLED		0x8
-#define V4L2_VP8_FRAME_FLAG_LOOP_FILTER_ADJ_ENABLED	0x10
-#define V4L2_VP8_FRAME_FLAG_REFRESH_ENTROPY_PROBS	0x20
-
-#define V4L2_VP8_FRAME_TYPE_KEYFRAME	0
-#define V4L2_VP8_FRAME_TYPE_INTER	1
-
-#define V4L2_VP8_FRAME_COLOR_SPACE_YUV		0
-#define V4L2_VP8_FRAME_COLOR_SPACE_RESERVED	1
-
-#define V4L2_VP8_FRAME_CLAMPING_REQUIRED	0
-#define V4L2_VP8_FRAME_CLAMPING_NO		1
-
-#define V4L2_VP8_FRAME_FILTER_TYPE_NORMAL	0
-#define V4L2_VP8_FRAME_FILTER_TYPE_SIMPLE	1
-
-#define V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_1	0
-#define V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_2	1
-#define V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_4	2
-#define V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_8	3
-
-#define V4L2_VP8_FRAME_GOLDEN_KEEP		0
-#define V4L2_VP8_FRAME_GOLDEN_LASTFRAME		1
-#define V4L2_VP8_FRAME_GOLDEN_ALTREF		2
-
-#define V4L2_VP8_FRAME_ALTREF_KEEP		0
-#define V4L2_VP8_FRAME_ALTREF_LASTFRAME		1
-#define V4L2_VP8_FRAME_ALTREF_GOLDEN		2
-
-#define V4L2_VP8_FRAME_REF_LAST 	0
-#define V4L2_VP8_FRAME_REF_GOLDEN	1
-#define V4L2_VP8_FRAME_REF_ALT		2
-
-/**
- * struct v4l2_ctrl_vp8_encode_params - VP8 encode parameters
- * @flags: combination of V4L2_VP8_FRAME_FLAG_{} flags.
- * @frame_type: specifies the frame type (key or inter).
- * 		Set to one of V4L2_VP8_FRAME_TYPE_{}.
- * @color_space: defines the YUV color space of the sequence.
- * 		 V4L2_VP8_FRAME_TYPE_INTER frames shall set this field to zero.
- * 		 Set to one of V4L2_VP8_FRAME_COLOR_SPACE_{}.
- * @clamping_type: defines pixel value clamping type.
- * 		   V4L2_VP8_FRAME_TYPE_INTER frames shall set this field to zero.
- * 		   Set to one of V4L2_VP8_FRAME_CLAMPING_{}.
- * @loop_filter_type: selects the type of loop filter applied.
- * 		 Set to one of V4L2_VP8_FRAME_FILTER_TYPE_{}.
- * @loop_filter_level: sets the strength of the applied loop filter.
- *		       Set to a value from the rage 0..63.
- * @sharpness_level: sets the sharpness of the applied loop filter.
- * 		     Set to a value from the range 0..7.
- * @log2_nbr_of_dct_partitions: determines the number of separate partitions
- * 				containing the DCT coefficients of macroblocks.
- * 				Set to one of V4L2_VP8_FRAME_NBR_DCT_PARTITIONS_{}.
- * @prob_intra: indicates the probability of an intra macroblock.
- *		Set to a value from the range 0..255.
- * @prob_last: indicates the probability that the last reference frame is used for inter-prediction.
- *		Set to a value from the range 0..255.
- * @prob_gf: indicates the probability that the golden reference frame is used for inter-prediction.
- *	     Set to a value from the range 0..255.
- * @copy_buffer_to_golden: specifies the golden frame refresh strategy.
- * 		    Set to one of V4L2_VP8_FRAME_FLAG_GOLDEN_{}.
- * @copy_buffer_to_alternate: specifies the atlref frame refresh strategy.
- * 		    Set to one of V4L2_VP8_FRAME_FLAG_ALTREF_{}.
- * @reference_type: specifies what kind of reference to use for current inter frame.
- * 		    V4L2_VP8_FRAME_TYPE_KEYFRAME shall set this field to zero.
- * 		    Set to one of V4L2_VP8_FRAME_REF_{}.
- */
-struct v4l2_ctrl_vp8_encode_params {
-	__u32 flags;
-	__u8 frame_type;
-	__u8 color_space;
-	__u8 clamping_type;
-	__u8 loop_filter_type;
-	__u8 loop_filter_level;
-	__u8 sharpness_level;
-	__u8 log2_nbr_of_dct_partitions;
-	__u8 prob_intra;
-	__u8 prob_last;
-	__u8 prob_gf;
-	__u8 copy_buffer_to_golden;
-	__u8 copy_buffer_to_alternate;
-	__u8 reference_type;
-};
-
-#define V4L2_CID_STATELESS_VP8_ENCODE_QP	(V4L2_CID_CODEC_STATELESS_BASE + 602)
 
 /* MPEG-compression definitions kept for backwards compatibility */
 #define V4L2_CTRL_CLASS_MPEG            V4L2_CTRL_CLASS_CODEC
@@ -3699,5 +3596,39 @@ struct v4l2_ctrl_vp8_encode_params {
 #define V4L2_CID_MPEG_BASE              V4L2_CID_CODEC_BASE
 #define V4L2_CID_MPEG_CX2341X_BASE      V4L2_CID_CODEC_CX2341X_BASE
 #define V4L2_CID_MPEG_MFC51_BASE        V4L2_CID_CODEC_MFC51_BASE
+
+#define V4L2_CID_COLORIMETRY_CLASS_BASE	(V4L2_CTRL_CLASS_COLORIMETRY | 0x900)
+#define V4L2_CID_COLORIMETRY_CLASS	(V4L2_CTRL_CLASS_COLORIMETRY | 1)
+
+#define V4L2_CID_COLORIMETRY_HDR10_CLL_INFO	(V4L2_CID_COLORIMETRY_CLASS_BASE + 0)
+
+struct v4l2_ctrl_hdr10_cll_info {
+	__u16 max_content_light_level;
+	__u16 max_pic_average_light_level;
+};
+
+#define V4L2_CID_COLORIMETRY_HDR10_MASTERING_DISPLAY	(V4L2_CID_COLORIMETRY_CLASS_BASE + 1)
+
+#define V4L2_HDR10_MASTERING_PRIMARIES_X_LOW	5
+#define V4L2_HDR10_MASTERING_PRIMARIES_X_HIGH	37000
+#define V4L2_HDR10_MASTERING_PRIMARIES_Y_LOW	5
+#define V4L2_HDR10_MASTERING_PRIMARIES_Y_HIGH	42000
+#define V4L2_HDR10_MASTERING_WHITE_POINT_X_LOW	5
+#define V4L2_HDR10_MASTERING_WHITE_POINT_X_HIGH	37000
+#define V4L2_HDR10_MASTERING_WHITE_POINT_Y_LOW	5
+#define V4L2_HDR10_MASTERING_WHITE_POINT_Y_HIGH	42000
+#define V4L2_HDR10_MASTERING_MAX_LUMA_LOW	50000
+#define V4L2_HDR10_MASTERING_MAX_LUMA_HIGH	100000000
+#define V4L2_HDR10_MASTERING_MIN_LUMA_LOW	1
+#define V4L2_HDR10_MASTERING_MIN_LUMA_HIGH	50000
+
+struct v4l2_ctrl_hdr10_mastering_display {
+	__u16 display_primaries_x[3];
+	__u16 display_primaries_y[3];
+	__u16 white_point_x;
+	__u16 white_point_y;
+	__u32 max_display_mastering_luminance;
+	__u32 min_display_mastering_luminance;
+};
 
 #endif
