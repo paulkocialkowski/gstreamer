@@ -25,6 +25,7 @@
 #include "gstv4l2codech264enc.h"
 #include "gstv4l2codecpool.h"
 #include "gstv4l2format.h"
+#include <gst/codecs/gstratecontroller.h>
 #include <gst/codecparsers/gsth264bitwriter.h>
 #include <gst/base/gstbytereader.h>
 
@@ -755,6 +756,8 @@ gst_v4l2_codec_h264_enc_v4l2_set_sps_pps (GstV4l2CodecH264Enc * self);
 static gboolean
 gst_v4l2_codec_h264_enc_v4l2_get_sps_pps (GstV4l2CodecH264Enc * self,
     GstH264SPS * h264_sps, GstH264PPS * h264_pps);
+static gboolean
+gst_v4l2_codec_h264_enc_v4l2_set_rc (GstV4l2CodecH264Enc * self);
 
 static gboolean
 gst_v4l2_codec_h264_enc_set_format (GstVideoEncoder * encoder,
@@ -852,6 +855,7 @@ gst_v4l2_codec_h264_enc_set_format (GstVideoEncoder * encoder,
       gst_v4l2_codec_h264_enc_v4l2_get_sps_pps (self, &self->sps, &self->pps);
 
     gst_v4l2_codec_h264_enc_v4l2_set_sps_pps (self);
+    gst_v4l2_codec_h264_enc_v4l2_set_rc (self);
 
     return TRUE;
   }
@@ -1180,6 +1184,69 @@ gst_v4l2_codec_h264_enc_v4l2_set_sps_pps (GstV4l2CodecH264Enc * self)
     GST_ELEMENT_ERROR (self, RESOURCE, WRITE,
         ("Driver did not accept the control parameters."), (NULL));
     return FALSE;
+  }
+
+  return TRUE;
+}
+
+static gboolean
+gst_v4l2_codec_h264_enc_v4l2_set_rc (GstV4l2CodecH264Enc * self)
+{
+  gint qp, qp_min, qp_max, rate_control, bitrate;
+  /* *INDENT-OFF* */
+  struct v4l2_ext_control control[] = {
+    {
+      .id = V4L2_CID_MPEG_VIDEO_H264_MIN_QP,
+    }, {
+      .id = V4L2_CID_MPEG_VIDEO_H264_MAX_QP,
+    }, {
+      .id = V4L2_CID_MPEG_VIDEO_FRAME_RC_ENABLE,
+    },
+  };
+  /* *INDENT-ON* */
+
+  g_object_get (self, "qp-max", &qp_max, "qp-min", &qp_min, NULL);
+  g_object_get (self, "rate-control", &rate_control, NULL);
+
+  control[0].value = qp_min;
+  control[1].value = qp_max;
+  control[2].value = rate_control != GST_RC_CONSTANT_QP;
+
+  if (!gst_v4l2_encoder_set_controls (self->encoder, NULL, control,
+          G_N_ELEMENTS (control))) {
+    GST_ELEMENT_ERROR (self, RESOURCE, WRITE,
+        ("Driver did not accept the control parameters."), (NULL));
+    return FALSE;
+  }
+
+  if (rate_control == GST_RC_CONSTANT_QP) {
+    g_object_get (self, "quantizer", &qp, NULL);
+
+    memset (control, 0, sizeof(control));
+    control[0].id = V4L2_CID_MPEG_VIDEO_H264_I_FRAME_QP;
+    control[0].value = qp;
+    control[1].id = V4L2_CID_MPEG_VIDEO_H264_P_FRAME_QP;
+    control[1].value = qp;
+
+    if (!gst_v4l2_encoder_set_controls (self->encoder, NULL, control, 2)) {
+      GST_ELEMENT_ERROR (self, RESOURCE, WRITE,
+          ("Driver did not accept the control parameters."), (NULL));
+      return FALSE;
+    }
+  } else if (rate_control == GST_RC_CONSTANT_BITRATE) {
+    g_object_get (self, "bitrate", &bitrate, NULL);
+
+    memset (control, 0, sizeof(control));
+    control[0].id = V4L2_CID_MPEG_VIDEO_BITRATE_MODE;
+    control[0].value = V4L2_MPEG_VIDEO_BITRATE_MODE_CBR;
+    control[1].id = V4L2_CID_MPEG_VIDEO_BITRATE;
+    control[1].value = bitrate;
+
+    if (!gst_v4l2_encoder_set_controls (self->encoder, NULL, control, 2)) {
+      GST_ELEMENT_ERROR (self, RESOURCE, WRITE,
+          ("Driver did not accept the control parameters."), (NULL));
+      return FALSE;
+    }
   }
 
   return TRUE;
