@@ -112,6 +112,7 @@ struct _GstV4l2CodecH264Enc
    * decode order while system_frame_number counts in presentation order.
    */
   guint16 frame_num;
+  guint16 poc;
 };
 
 G_DEFINE_ABSTRACT_TYPE (GstV4l2CodecH264Enc, gst_v4l2_codec_h264_enc,
@@ -1179,6 +1180,7 @@ gst_v4l2_codec_h264_enc_fill_encode_params (GstH264Encoder * encoder,
   }
 
   encode_params->frame_num = self->frame_num;
+  encode_params->pic_order_cnt_lsb = self->poc;
 
   encode_params->pic_parameter_set_id = self->pps.id;
   encode_params->slice_alpha_c0_offset_div2 = -2;
@@ -1278,6 +1280,24 @@ gst_v4l2_codec_h264_enc_get_next_frame_num (GstH264Encoder * encoder,
   return frame_num;
 }
 
+static gint
+gst_v4l2_codec_h264_enc_get_next_poc (GstH264Encoder * encoder,
+    GstH264Frame * h264_frame)
+{
+  GstV4l2CodecH264Enc *self = GST_V4L2_CODEC_H264_ENC (encoder);
+  gint max_pic_order_cnt_lsb =
+    (self->sps.log2_max_pic_order_cnt_lsb_minus4 + 4) << 1;
+  gint poc;
+
+  if (h264_frame->type == GstH264Keyframe) {
+    poc = 0;
+  } else {
+    poc = (self->poc + 1) % max_pic_order_cnt_lsb;
+  }
+
+  return poc;
+}
+
 static GstFlowReturn
 gst_v4l2_codec_h264_enc_encode_frame (GstH264Encoder * encoder,
     GstH264Frame * h264_frame)
@@ -1332,6 +1352,8 @@ gst_v4l2_codec_h264_enc_encode_frame (GstH264Encoder * encoder,
 
   self->frame_num =
       gst_v4l2_codec_h264_enc_get_next_frame_num (encoder, h264_frame);
+  self->poc =
+      gst_v4l2_codec_h264_enc_get_next_poc (encoder, h264_frame);
 
   gst_v4l2_codec_h264_enc_fill_encode_params (encoder, &encode_params,
       h264_frame);
