@@ -626,6 +626,33 @@ gst_v4l2_encoder_set_crop (GstV4l2Encoder * self, const GstVideoInfo * info)
   return TRUE;
 }
 
+gboolean
+gst_v4l2_encoder_set_fps (GstV4l2Encoder * self, const GstVideoInfo * info)
+{
+  struct v4l2_streamparm parm = (struct v4l2_streamparm) {
+    .type = self->sink_buf_type,
+  };
+  struct v4l2_fract *timeperframe = &parm.parm.output.timeperframe;
+  gint ret;
+
+  /* Time per frame is the inverse of fps. */
+  timeperframe->numerator = GST_VIDEO_INFO_FPS_D (info);
+  timeperframe->denominator = GST_VIDEO_INFO_FPS_N (info);
+
+  if (!timeperframe->numerator || !timeperframe->denominator) {
+    timeperframe->numerator = 1;
+    timeperframe->denominator = 30;
+  }
+
+  ret = ioctl (self->video_fd, VIDIOC_S_PARM, &parm);
+  if (ret < 0) {
+    GST_ERROR_OBJECT (self, "VIDIOC_S_PARM failed: %s", g_strerror (errno));
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
 gint
 gst_v4l2_encoder_request_buffers (GstV4l2Encoder * self,
     GstPadDirection direction, guint num_buffers, guint mem_type)
