@@ -1358,6 +1358,15 @@ gst_v4l2_codec_h264_enc_encode_frame (GstH264Encoder * encoder,
   gst_v4l2_codec_h264_enc_fill_encode_params (encoder, &encode_params,
       h264_frame);
 
+  /*
+   * IDR picture id must change in consecutive IDR frames but can stay at zero
+   * and be reused otherwise.
+   */
+  if (h264_frame->type == GstH264Keyframe)
+    self->idr_pic_id++;
+  else
+    self->idr_pic_id = 0;
+
   if (!gst_v4l2_encoder_set_controls (self->encoder, request, control,
           G_N_ELEMENTS (control))) {
     GST_ELEMENT_ERROR (self, RESOURCE, WRITE,
@@ -1406,12 +1415,6 @@ gst_v4l2_codec_h264_enc_encode_frame (GstH264Encoder * encoder,
     gst_buffer_replace (&frame->output_buffer, resized_buffer);
     gst_buffer_unref (resized_buffer);
   }
-
-  /*
-   * TODO All frames in an IDR must have the same idr_pic_id. Fix how the
-   * idr_pic_id is managed and updated.
-   */
-  self->idr_pic_id++;
 
   return gst_video_encoder_finish_frame (venc, frame);
 
