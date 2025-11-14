@@ -330,38 +330,6 @@ gst_v4l2_codec_h264_enc_buffers_allocation (GstVideoEncoder * encoder)
   return TRUE;
 }
 
-static guint
-gst_v4l2_codec_deemulate_nal (guint8 * data, guint size, guint maxsize)
-{
-  GstByteReader br;
-  /* skip initial start code */
-  guint offset = 3;
-
-  gst_byte_reader_init (&br, data, maxsize);
-
-  do {
-    offset = gst_byte_reader_masked_scan_uint32 (&br,
-        0xfffffc00, 0x00000000, offset, size);
-    if (offset == -1 || offset >= size)
-      break;
-
-    if (size == maxsize)
-      break;
-
-    /* Make 1 byte space after the two leading zeros */
-    offset += 2;
-    memmove (data + offset + 1, data + offset, size - offset);
-
-    /* Write the emulation byte */
-    data[offset] = 0x03;
-
-    size++;
-    offset += 3;
-  } while (TRUE);
-
-  return size;
-}
-
 static void
 sps_from_v4l2 (GstH264SPS * to, struct v4l2_ctrl_h264_sps *from)
 {
@@ -417,49 +385,6 @@ pps_from_v4l2 (GstH264PPS * to, struct v4l2_ctrl_h264_pps *from)
     to->transform_8x8_mode_flag = 1;
   if (from->flags & V4L2_H264_PPS_FLAG_DEBLOCKING_FILTER_CONTROL_PRESENT)
     to->deblocking_filter_control_present_flag = 1;
-}
-
-static gboolean
-gst_v4l2_codec_h264_enc_set_codec_data (GstVideoEncoder * encoder,
-    GstBuffer * codec_data, guint * data_size)
-{
-  GstV4l2CodecH264Enc *self = GST_V4L2_CODEC_H264_ENC (encoder);
-
-  GstMapInfo info;
-  guint8 *data;
-  guint size;
-
-  gst_buffer_map (codec_data, &info, GST_MAP_WRITE);
-  data = (guint8 *) info.data;
-  memset (data, 0, info.size);
-
-  size = SPS_SIZE;
-
-  if (gst_h264_bit_writer_sps (&self->sps, TRUE, data,
-          &size) != GST_H264_BIT_WRITER_OK) {
-    gst_buffer_unmap (codec_data, &info);
-    return FALSE;
-  }
-
-  size = gst_v4l2_codec_deemulate_nal (data, size, SPS_SIZE);
-
-  data += size;
-  *data_size = size;
-
-  size = PPS_SIZE;
-  if (gst_h264_bit_writer_pps (&self->pps, TRUE, data,
-          &size) != GST_H264_BIT_WRITER_OK) {
-    gst_buffer_unmap (codec_data, &info);
-    return FALSE;
-  }
-
-  size = gst_v4l2_codec_deemulate_nal (data, size, PPS_SIZE);
-
-  *data_size += size;
-
-  gst_buffer_unmap (codec_data, &info);
-
-  return TRUE;
 }
 
 static guint8
@@ -1307,23 +1232,10 @@ gst_v4l2_codec_h264_enc_encode_frame (GstH264Encoder * encoder,
   GstV4l2Request *request = NULL;
   GstFlowReturn ret = GST_FLOW_ERROR;
   GstVideoCodecFrame *frame = h264_frame->frame;
-  GstBuffer *codec_data = NULL;
   GstBuffer *resized_buffer;
   guint32 bytesused;
-  guint data_size;
   guint32 flags;
   struct v4l2_ctrl_h264_encode_params encode_params;
-
-  if (h264_frame->type == GstH264Keyframe) {
-    codec_data = gst_buffer_new_and_alloc (38 + SPS_SIZE + PPS_SIZE);
-    if (!gst_v4l2_codec_h264_enc_set_codec_data (venc, codec_data, &data_size)) {
-      GST_ELEMENT_ERROR (self, RESOURCE, NO_SPACE_LEFT,
-          ("Failed to create sps/pps buffer."), (NULL));
-      gst_buffer_unref (codec_data);
-      goto done;
-    }
-    gst_buffer_resize (codec_data, 0, data_size);
-  }
 
   struct v4l2_ext_control control[] = {
     /* *INDENT-OFF* */
@@ -1400,20 +1312,15 @@ gst_v4l2_codec_h264_enc_encode_frame (GstH264Encoder * encoder,
 
   resized_buffer = gst_buffer_copy_region (frame->output_buffer,
       GST_BUFFER_COPY_MEMORY | GST_BUFFER_COPY_DEEP, 0, bytesused);
+  gst_buffer_replace (&frame->output_buffer, resized_buffer);
+  gst_buffer_unref (resized_buffer);
 
-  /*
-   * TODO:
-   * At the moment the SPS and PPS ID is always 0 but encoders are encouraged to
-   * change the ID once SPS or PPS differ from the prev. SPS/PPS instead of
-   * reusing the same ID which trigger a value update during decode.
-   */
   if (h264_frame->type == GstH264Keyframe) {
-    gst_buffer_append (codec_data, resized_buffer);
-    gst_buffer_replace (&frame->output_buffer, codec_data);
-    gst_buffer_unref (codec_data);
+    GST_BUFFER_FLAG_UNSET (frame->output_buffer, GST_BUFFER_FLAG_DELTA_UNIT);
+    GST_VIDEO_CODEC_FRAME_SET_SYNC_POINT (frame);
   } else {
-    gst_buffer_replace (&frame->output_buffer, resized_buffer);
-    gst_buffer_unref (resized_buffer);
+    GST_BUFFER_FLAG_SET (frame->output_buffer, GST_BUFFER_FLAG_DELTA_UNIT);
+    GST_VIDEO_CODEC_FRAME_UNSET_SYNC_POINT (frame);
   }
 
   return gst_video_encoder_finish_frame (venc, frame);
