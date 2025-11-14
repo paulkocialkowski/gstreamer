@@ -786,6 +786,9 @@ gst_v4l2_codec_h264_enc_set_format (GstVideoEncoder * encoder,
     return FALSE;
   }
 
+  gst_v4l2_encoder_set_crop (self->encoder, &state->info);
+  gst_v4l2_encoder_set_fps (self->encoder, &state->info);
+
   self->width = state->info.width;
   self->height = state->info.height;
   GST_VIDEO_ENCODER_CLASS (parent_class)->set_format (encoder, state);
