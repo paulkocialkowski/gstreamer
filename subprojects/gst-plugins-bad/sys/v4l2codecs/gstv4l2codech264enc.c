@@ -1257,7 +1257,7 @@ gst_v4l2_codec_h264_enc_get_next_frame_num (GstH264Encoder * encoder,
     GstH264Frame * h264_frame)
 {
   GstV4l2CodecH264Enc *self = GST_V4L2_CODEC_H264_ENC (encoder);
-  gint max_frame_num = (self->sps.log2_max_frame_num_minus4 + 4) << 1;
+  gint max_frame_num = 1 << (self->sps.log2_max_frame_num_minus4 + 4);
   gint frame_num;
 
   /*
@@ -1281,7 +1281,7 @@ gst_v4l2_codec_h264_enc_get_next_poc (GstH264Encoder * encoder,
 {
   GstV4l2CodecH264Enc *self = GST_V4L2_CODEC_H264_ENC (encoder);
   gint max_pic_order_cnt_lsb =
-    (self->sps.log2_max_pic_order_cnt_lsb_minus4 + 4) << 1;
+    1 << (self->sps.log2_max_pic_order_cnt_lsb_minus4 + 4);
   gint poc;
 
   if (h264_frame->type == GstH264Keyframe) {
