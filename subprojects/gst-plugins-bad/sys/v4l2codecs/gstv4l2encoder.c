@@ -475,10 +475,6 @@ gst_v4l2_encoder_select_sink_format (GstV4l2Encoder * self, GstCaps * caps,
     return FALSE;
   }
 
-  GST_DEBUG_OBJECT (self, "Original caps: %" GST_PTR_FORMAT, caps);
-  caps = gst_caps_fixate (caps);
-  GST_DEBUG_OBJECT (self, "Fixated caps: %" GST_PTR_FORMAT, caps);
-
   gst_video_info_dma_drm_init (&tmp_vinfo_drm);
   if (!gst_video_info_dma_drm_from_caps (&tmp_vinfo_drm, caps) &&
       !gst_video_info_from_caps (&tmp_vinfo_drm.vinfo, caps)) {
