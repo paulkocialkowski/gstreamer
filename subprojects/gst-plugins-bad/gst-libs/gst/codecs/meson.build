@@ -68,7 +68,7 @@ gstcodecs = library('gstcodecs-' + api_version,
   soversion : soversion,
   darwin_versions : osxversion,
   install : true,
-  dependencies : [gstvideo_dep, gstcodecparsers_dep],
+  dependencies : [gstvideo_dep, gstcodecparsers_dep, libm],
 )
 
 library_def = {'lib': gstcodecs}
@@ -94,7 +94,7 @@ if build_gir
       '--c-include=gst/codecs/gstvp8encoder.h',
       '--c-include=gst/codecs/gsth264encoder.h',
       ],
-    'dependencies' : [gstvideo_dep, gstcodecparsers_dep]
+    'dependencies' : [gstvideo_dep, gstcodecparsers_dep, libm]
   }
   library_def += {'gir': [gir]}
   if not static_build
