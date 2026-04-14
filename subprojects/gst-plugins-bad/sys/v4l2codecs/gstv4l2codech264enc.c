@@ -800,9 +800,6 @@ gst_v4l2_codec_h264_enc_set_format (GstVideoEncoder * encoder,
   self->width_in_macroblocks = (self->width + 15) / 16;
   self->height_in_macroblocks = (self->height + 15) / 16;
 
-  if (self->output_state)
-    gst_video_codec_state_unref (self->output_state);
-
   if (!gst_v4l2_codec_h264_enc_decide_profile_and_level (self, state))
     return FALSE;
 
@@ -810,6 +807,9 @@ gst_v4l2_codec_h264_enc_set_format (GstVideoEncoder * encoder,
       "stream-format", G_TYPE_STRING, "byte-stream",
       "alignment", G_TYPE_STRING, "au",
       "profile", G_TYPE_STRING, self->profile_name, NULL);
+
+  if (self->output_state)
+    gst_video_codec_state_unref (self->output_state);
 
   self->output_state =
       gst_video_encoder_set_output_state (GST_VIDEO_ENCODER (self),
