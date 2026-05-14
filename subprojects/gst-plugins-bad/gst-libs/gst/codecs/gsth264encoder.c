@@ -98,6 +98,11 @@ gst_h264_encoder_start (GstVideoEncoder * encoder)
 static gboolean
 gst_h264_encoder_stop (GstVideoEncoder * encoder)
 {
+  GstH264Encoder *self = GST_H264_ENCODER (encoder);
+  GstH264EncoderPrivate *priv = self->priv;
+
+  priv->last_keyframe = 0;
+
   return TRUE;
 }
 
@@ -124,6 +129,8 @@ gst_h264_encoder_set_frame_type (GstH264Encoder * self,
     h264_frame->type = GstH264Keyframe;
     return GST_FLOW_OK;
   }
+
+  GST_DEBUG_OBJECT (self, "system frame number %d last keyframe %d interval %d\n", frame->system_frame_number, priv->last_keyframe, priv->keyframe_interval);
 
   if ((frame->system_frame_number - priv->last_keyframe) >=
       priv->keyframe_interval || frame->system_frame_number == 0) {
