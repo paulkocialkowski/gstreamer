@@ -109,8 +109,8 @@ struct _GstV4l2CodecH264Enc
   unsigned int idr_pic_id;
 
   /*
-   * frame_num is distinct from system_frame_number as frame_num counts in
-   * decode order while system_frame_number counts in presentation order.
+   * frame_num is distinct from frame number as frame_num counts in
+   * decode order while frame number counts in presentation order.
    */
   guint16 frame_num;
   guint16 poc;
@@ -1324,7 +1324,7 @@ gst_v4l2_codec_h264_enc_encode_frame (GstH264Encoder * encoder,
   }
 
   request = gst_v4l2_encoder_alloc_request (self->encoder,
-      frame->system_frame_number, frame->input_buffer, frame->output_buffer);
+      h264_frame->number, frame->input_buffer, frame->output_buffer);
 
   if (!request) {
     GST_ELEMENT_ERROR (self, RESOURCE, NO_SPACE_LEFT,

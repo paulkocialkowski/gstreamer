@@ -56,6 +56,7 @@ enum
 
 struct _GstH264EncoderPrivate
 {
+  guint32 number;
   guint32 last_keyframe;
   GstRateController *rate_controller;
 
@@ -101,6 +102,7 @@ gst_h264_encoder_stop (GstVideoEncoder * encoder)
   GstH264Encoder *self = GST_H264_ENCODER (encoder);
   GstH264EncoderPrivate *priv = self->priv;
 
+  priv->number = 0;
   priv->last_keyframe = 0;
 
   return TRUE;
@@ -118,6 +120,16 @@ gst_h264_encoder_set_format (GstVideoEncoder * encoder,
   return TRUE;
 }
 
+void
+gst_h264_encoder_set_frame_number (GstH264Encoder * self,
+    GstH264Frame * h264_frame)
+{
+  GstH264EncoderPrivate *priv = self->priv;
+
+  h264_frame->number = priv->number;
+  priv->number++;
+}
+
 static GstFlowReturn
 gst_h264_encoder_set_frame_type (GstH264Encoder * self,
     GstH264Frame * h264_frame)
@@ -130,10 +142,10 @@ gst_h264_encoder_set_frame_type (GstH264Encoder * self,
     return GST_FLOW_OK;
   }
 
-  GST_DEBUG_OBJECT (self, "system frame number %d last keyframe %d interval %d\n", frame->system_frame_number, priv->last_keyframe, priv->keyframe_interval);
+  GST_DEBUG_OBJECT (self, "frame number %d last keyframe %d interval %d\n", h264_frame->number, priv->last_keyframe, priv->keyframe_interval);
 
-  if ((frame->system_frame_number - priv->last_keyframe) >=
-      priv->keyframe_interval || frame->system_frame_number == 0) {
+  if ((h264_frame->number - priv->last_keyframe) >= priv->keyframe_interval ||
+      h264_frame->number == 0) {
     /* Generate a keyframe */
     GST_DEBUG_OBJECT (self, "Generate a keyframe");
     h264_frame->type = GstH264Keyframe;
@@ -155,7 +167,7 @@ gst_h264_encoder_mark_frame (GstH264Encoder * self, GstH264Frame * h264_frame)
 
   switch (h264_frame->type) {
     case GstH264Keyframe:
-      priv->last_keyframe = frame->system_frame_number;
+      priv->last_keyframe = h264_frame->number;
       rc_frame_type = GST_RC_KEY_FRAME;
       break;
     default:
@@ -175,6 +187,8 @@ gst_h264_encoder_handle_frame (GstVideoEncoder * encoder,
   GstH264EncoderClass *klass = GST_H264_ENCODER_GET_CLASS (self);
   GstFlowReturn ret = GST_FLOW_OK;
   GstH264Frame *h264_frame = gst_h264_frame_new (frame);
+
+  gst_h264_encoder_set_frame_number (self, h264_frame);
 
   ret = gst_h264_encoder_set_frame_type (self, h264_frame);
   if (ret != GST_FLOW_OK)
