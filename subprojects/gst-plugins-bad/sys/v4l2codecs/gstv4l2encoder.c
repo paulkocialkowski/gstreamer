@@ -789,6 +789,7 @@ gst_v4l2_encoder_import_buffer (GstV4l2Encoder * self, GstBuffer * buffer,
     struct v4l2_buffer *v4l2_buffer)
 {
   GstVideoMeta *vmeta = NULL;
+  gint index;
   gint i;
 
   if (!self->mplane) {
@@ -850,14 +851,15 @@ gst_v4l2_encoder_import_buffer (GstV4l2Encoder * self, GstBuffer * buffer,
     /* *INDENT-ON* */
   }
 
-  v4l2_buffer->length = vmeta->n_planes;
-  v4l2_buffer->index = buffer_state_find_buffer (self,
-      v4l2_buffer->m.planes[0].m.fd);
+  index = buffer_state_find_buffer (self, v4l2_buffer->m.planes[0].m.fd);
 
-  if (v4l2_buffer->index < 0) {
+  if (index < 0) {
     GST_INFO_OBJECT (self, "no more free buffer to queue the picture.");
     return FALSE;
   }
+
+  v4l2_buffer->length = vmeta->n_planes;
+  v4l2_buffer->index = (unsigned int)index;
 
   return TRUE;
 }
@@ -878,10 +880,10 @@ gst_v4l2_encoder_queue_sink_buffer (GstV4l2Encoder * self,
     .m.planes = planes,
   };
 
-  GST_TRACE_OBJECT (self, "Queuing picture buffer %i", buf.index);
-
   if (!gst_v4l2_encoder_import_buffer (self, buffer, &buf))
     return FALSE;
+
+  GST_TRACE_OBJECT (self, "Queuing picture buffer %i", buf.index);
 
   ret = ioctl (self->video_fd, VIDIOC_QBUF, &buf);
   if (ret < 0) {
