@@ -121,8 +121,10 @@ buffer_state_init (GstV4l2Encoder * self)
 {
   gint i;
 
-  for (i = 0; i < VIDEO_MAX_FRAME; i++)
+  for (i = 0; i < VIDEO_MAX_FRAME; i++) {
+    self->buffer_state[i].queued = FALSE;
     self->buffer_state[i].dmabuf_fd = -1;
+  }
 }
 
 static void
@@ -307,6 +309,8 @@ gst_v4l2_encoder_close (GstV4l2Encoder * self)
   self->media_fd = 0;
   self->video_fd = 0;
   self->opened = FALSE;
+
+  buffer_state_init (self);
 
   return TRUE;
 }
