@@ -472,13 +472,14 @@ gst_v4l2_codec_allocator_detach (GstV4l2CodecAllocator * self)
 
   GST_OBJECT_LOCK (self);
   if (!self->detached) {
+    GstV4l2CodecBuffer *buf;
     self->detached = TRUE;
     if (decoder) {
       if (!gst_v4l2_decoder_has_remove_bufs (decoder)) {
         gst_v4l2_decoder_request_buffers (decoder, self->direction, 0);
+        while ((buf = g_queue_pop_tail (&self->pool)))
+          gst_v4l2_codec_buffer_free (buf);
       } else {
-        GstV4l2CodecBuffer *buf;
-
         while ((buf = g_queue_pop_tail (&self->pool))) {
           gst_v4l2_decoder_remove_buffers (decoder, self->direction,
               buf->index, 1);
@@ -487,8 +488,9 @@ gst_v4l2_codec_allocator_detach (GstV4l2CodecAllocator * self)
       }
     }
     if (encoder) {
-      /* TODO Implement gst_v4l2_encoder_remove_buffers */
       gst_v4l2_encoder_request_buffers (encoder, self->direction, 0, V4L2_MEMORY_MMAP);
+      while ((buf = g_queue_pop_tail (&self->pool)))
+        gst_v4l2_codec_buffer_free (buf);
     }
   }
   GST_OBJECT_UNLOCK (self);
